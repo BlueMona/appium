@@ -5,6 +5,7 @@ import B from 'bluebird';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import wd from 'wd';
+import request from 'request-promise';
 import { main as appiumServer } from '../lib/main';
 import { TEST_FAKE_APP, TEST_HOST, TEST_PORT } from './helpers';
 
@@ -74,6 +75,59 @@ describe('FakeDriver - via HTTP', () => {
 
       await B.delay(250);
       await driver.source().should.eventually.be.rejectedWith(/terminated/);
+    });
+
+    it('should accept W3C capabilities', async () => {
+      // Try with valid capabilities and check that it returns a session ID
+      const w3cCaps = {
+        capabilities: {
+          alwaysMatch: {platformName: 'Fake'},
+          firstMatch: [{'appium:deviceName': 'Fake', 'appium:app': TEST_FAKE_APP}],
+        }
+      };
+
+      const { status, value, sessionId } = await request.post({url: `http://${TEST_HOST}:${TEST_PORT}/wd/hub/session`, json: w3cCaps});
+      status.should.equal(0);
+      sessionId.should.be.a.string;
+      value.should.exist;
+
+      // Now use that sessionId to call /screenshot
+      const { status:screenshotStatus, value:screenshotValue } = await request({url: `http://${TEST_HOST}:${TEST_PORT}/wd/hub/session/${sessionId}/screenshot`, json: true});
+      screenshotValue.should.equal('hahahanotreallyascreenshot');
+      screenshotStatus.should.equal(0);
+      // Now use that sessionID to call an arbitrary W3C-only endpoint that isn't implemented to see if it throws correct error
+      await request.post({url: `http://${TEST_HOST}:${TEST_PORT}/wd/hub/session/${sessionId}/execute/async`, json: {script: '', args: ['a']}}).should.eventually.be.rejectedWith(/501/);
+
+      // Now try with invalid capabilities and check that it returns 500 status
+      const badW3Ccaps = {
+        capabilities: {
+          alwaysMatch: {},
+          firstMatch: [{'appium:deviceName': 'Fake', 'appium:app': TEST_FAKE_APP}],
+        }
+      };
+
+      try {
+        await request.post({url: `http://${TEST_HOST}:${TEST_PORT}/wd/hub/session`, json: badW3Ccaps});
+      } catch (e) {
+        e.statusCode.should.equal(500);
+      }
+    });
+
+    it('should accept a combo of W3C and JSONWP capabilities', async () => {
+      const combinedCaps = {
+        "desiredCapabilities": caps,
+        "capabilities": {
+          "alwaysMatch": {},
+          "firstMatch": [{
+            "platformName": "Fake",
+          }]
+        }
+      };
+
+      const { status, value, sessionId } = await request.post({url: `http://${TEST_HOST}:${TEST_PORT}/wd/hub/session`, json: combinedCaps});
+      status.should.equal(0);
+      value.platformName.should.equal('Fake');
+      sessionId.should.exist;
     });
   });
 });

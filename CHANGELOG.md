@@ -1,3 +1,203 @@
+CHANGES IN VERSION 1.7.2 (from 1.7.1)
+===================================
+
+Appium 1.7.2 is a feature and bug fix release. It fixes many issues found in
+earlier releases.
+
+
+#### General
+* Fix memory leak in server logging
+* Add support for MacOS 10.13
+* Clean up logging to make messages more clear and useful
+* Add `printPageSourceOnFindFailure` to automatically log the current page source when finding an
+  element or elements fails
+* Add ability to take screenshots of an element
+* Begin to handle Selenium W3C specification
+
+#### iOS
+* Simulators
+  * Clean up handling in Xcode 9
+  * Add support for `shake` gesture (requires AppleScript)
+  * Add support for custom geo locations (requires AppleScript)
+  * Add possibility to clear caches
+  * Make sure execution does not fail when trying to shut down simulators that
+    are already shut down
+* Fix handling of source when within a frame/iframe, so that the source of the
+  frame is retrieved instead of that of the top-most frameset
+* Fix error when unable to parse real device date/time, to return unparsable
+  date rather than `Invalid Date`
+* Fix getting crash logs
+* Fix getting device logs in iOS 10+
+* Fix cleaning up of temporary files
+* Correctly handle device names for iPhone 7, 8 and X in Xcode 9
+* Fix screenshots for larger real devices
+* Fix runtime Xcode selection through `DEVELOPER_DIR` environment variable
+* Add `useJSONSource` desired capability to force Appium to use WDA JSON source
+  and parse locally, to speed up source retrieval on larger devices
+* Fix file pushing/pulling so it works for simulators and real devices
+
+#### iOS - Instruments-specific
+
+
+#### Android
+* Fix handling of install/upgrade of Appium helper apps (for settings manipulation
+  and unlocking of devices)
+* Add support for Chromedriver 2.33 (which supports webviews on Android O)
+* Add `showChromedriverLog` desired capability to bring Chromedriver logs in-line
+  in the Appium server logs
+* Fix error in stopping coverage when session failed to start
+* Add support for getting and setting animation state
+* Fix handling of size-limited text fields in API levels below 24
+* Add support for getting the current value of progress bars
+* Fix handling of initial orientation, and make sure no orientation is set if
+  nothing is requested
+* Make sure all UiAutomator commands are properly handled
+* Ensure `pageLoadStrategy` capability is passed to Chromedriver
+* Add support to get currently running package name
+* Ensure non-working Chromedriver is correctly handled
+* Add `password` to retrievable element attributes
+* Fix locale/language setting
+* Add `clearDeviceLogsOnStart` desired capability, to clear `adb` `logcat` logs when the session is started
+* Add `--relaxed-security`, and `mobile: shell` access to `adb`
+
+CHANGES IN VERSION 1.7.1 (from 1.7.0)
+===================================
+
+Appium 1.7.1 fixes multiple issues with the previous release.
+
+#### iOS
+* Add ability to change default Simulator preferences
+
+#### iOS - XCUITest
+* Can use xctestrun file to launch WDA
+* Fix bug that was causing startCapture to be called more than once
+* Apply a workaround for setting default device orientation
+* Update offset determination for iPad
+
+#### iOS+Safari
+* Add handler for starting/stopping JS console capture
+
+#### Android
+* Add support to force upgrade settings app
+* Always assumes the file to be pushed by `pushFile` command contains binary data
+* Add ADB option to to force reinstall on upgrade
+
+#### Android - UiAutomator 2
+* Do not proxy getting app strings
+
+
+CHANGES IN VERSION 1.7.0 (from 1.6.5)
+===================================
+
+**Note:** This is a feature release, marking two major changes:
+  * Support iOS 11 through Xcode 9 beta 6
+  * Support multiple simultaneous sessions in Android and iOS (9+)
+
+**Known Issues:**
+  * Android
+    * Webviews on Android O do not work because of a bug in Chromedriver. We
+      are working on a workaround. Chrome sessions still work
+  * iOS
+    * Touch ID enrollment on simulators in Xcode 9 does not work because of an
+      issue with AppleScript
+    * Scaling simulators with Xcode 9 does not work
+    * Simulators in Xcode 9 produce no meaningful device logs
+    * Parallel Safari/Webview sessions are not working due to an Apple bug
+
+#### General
+* Fix handling of sending keys to elements in recent versions of Selenium
+* Allow `app` capability that is a url to have query parameters
+* Begin to allow multiple device support in situations where it is possible
+  (e.g., iOS under Xcode 9)
+* Add `isHeadless` capability to allow running simulator/emulator with no UI
+
+#### iOS
+* Add command to upload media to simulator
+* Fix reliability of touch ID functionality
+* Fix detection of system apps
+* Update atoms used for MobileSafari automation to those of Selenium 3.5.3
+* Add `realDeviceLogger` capability to allow specification of what program to
+  use to capture logs on real device
+* Fix handling of `enablePerformanceLogging` capability in Safari tests
+* Fix offset when Safari on an iPad has multiple tabs
+
+#### iOS - XCUITest
+* Support for latest Beta of iOS 11 (Xcode 9 beta 6)
+* Multiple device support
+* Fix handling of bundle id on simulators
+* Make `nativeWebTap` a setting as well as a desired capability
+* Allow `nativeWebTap` to work on real devices
+* Do not try to uninstall app before installing on real device, which was causing
+  many issues
+* Fix clearing of text fields
+* Change behavior of `useNewWDA`: if `true`, forces uninstall of any existing
+  WebDriverAgent app on device. Set it to `true` if you want to apply different
+  startup options for WebDriverAgent for each session. Real devices require
+  WebDriverAgent client to run for as long as possible without reinstall/restart
+  to avoid issues. The `false` value will try to detect currently running WDA
+  listener executed by previous testing session(s) and reuse it if possible,
+  which is highly recommended for real device testing and to speed up suites of
+  multiple tests in general. A new WDA session will be triggered at the default
+  URL (http://localhost:8100) if WDA is not listening and `webDriverAgentUrl`
+  capability is not set.
+* Allow setting url in native context
+* Fix screenshot functionality
+
+#### Android
+* Add `remoteAdbHost` capability to specify the host on which adb is running, if
+  it is not localhost
+* Add methods to start and stop recording the screen
+* Fix screenshot commands
+* Skip setting of mock location for emulators
+* Add methods for emulator phone capacity: `sendSMS`, `gsmCall`, `gsmSignal`,
+  `gsmVoice`, `powerAC`, `powerCapacity`, and `networkSpeed`
+* Fix cleanup of adb port forwarding during Chrome sessions
+* Fix error where package name would be appended to fully qualified activity
+  name and package finding would then fail
+* Properly handle bootstrap failure on launch
+* Make sure correct logger is used for bootstrap
+
+#### Android - UIAutomator 2
+* Fix handling of `adbPort` capability
+* Fix coverage handling
+* Handle pressing and long pressing key codes
+* Enable `nativeWebScreenshot` capability
+* Fix restoring of IME when `unicodeKeyboard`/`resetKeyboard` capabilities are
+  used
+* Add `disableWindowAnimation` capability to launch instrumentation with no
+  animation
+* Correctly start ChromeDriver session for Chrome session
+* Allow getting `password` attribute from elements
+
+
+
+
+CHANGES IN VERSION 1.7.0-beta (from 1.6.5)
+===================================
+
+**Note:** This is a **_BETA_** release. Please direct any issues to the [Appium
+issue tracker](https://github.com/appium/appium/issues) and provide as much
+information as possible.
+
+This release exists to provide an updatable package in order to get the latest
+work on Appium. To install, first uninstall Appium and then re-install with the
+`beta` tag. To get any changes that have been published to sub-packages, simply
+repeat that process.
+```
+npm uninstall -g appium
+npm install -g appium@beta
+```
+
+If you are running iOS tests with the XCUITest backend (i.e., iOS 10+ tests, and
+some iOS 9.3 tests, if the `automationName` capability is set to `XCUITest`), you
+should also remove the old build artifacts.
+1. Remove derived data: `rm -rf ~/Library/Developer/Xcode/DerivedData/WebDriverAgent-*`
+2. Remove `WebDriverAgentRunner` application from any real device being tested.
+
+#### Android
+* Add beta version of Espresso Driver. To use, set `automationName = espresso`.
+
+
 CHANGES IN VERSION 1.6.6-beta.4 (from 1.6.5)
 ===================================
 

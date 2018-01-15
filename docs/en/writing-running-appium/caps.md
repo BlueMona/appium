@@ -1,29 +1,62 @@
-## Appium server capabilities
+## Appium Desired Capabilities
 
-<expand_table>
+Desired Capabilities are keys and values encoded in a JSON object, sent by
+Appium clients to the server when a new automation session is requested. They
+tell the Appium drivers all kinds of important things about how you want your
+test to work. Each Appium client builds capabilities in a way specific to the
+client's language, but at the end of the day, they are sent over to Appium as
+JSON objects.
+
+Some important capabilities are demonstrated in the following example:
+
+```json
+{
+    "platformName": "iOS",
+    "platformVersion": "11.0",
+    "deviceName": "iPhone 7",
+    "automationName": "XCUITest",
+    "app": "/path/to/my.app"
+}
+```
+
+This set of Desired Capabilities expresses the desire for Appium to begin an
+automation session on an iPhone 7 simulator with iOS 11, using the [XCUITest
+Driver](/docs/en/drivers/ios-xcuitest.md), with `/path/to/my.app` as the app
+under test.
+
+There are many, many Capabilities that Appium supports. Capabilities also
+differ by driver, though there are a standard set that most drivers pay
+attention to. What follows are a series of tables outlining the various Desired
+Capabilities available in general and for specific drivers.
+
+### General Capabilities
+
+These Capabilities span multiple drivers.
 
 |Capability|Description|Values|
 |----|-----------|-------|
-|`automationName`|Which automation engine to use|`Appium` (default) or `Selendroid`|
+|`automationName`|Which automation engine to use|`Appium` (default) or `Selendroid` or `UiAutomator2` or `Espresso` for Android or `XCUITest` for iOS or `YouiEngine` for application built with You.i Engine|
 |`platformName`|Which mobile OS platform to use|`iOS`, `Android`, or `FirefoxOS`|
 |`platformVersion`|Mobile OS version|e.g., `7.1`, `4.4`|
 |`deviceName`|The kind of mobile device or emulator to use|`iPhone Simulator`, `iPad Simulator`, `iPhone Retina 4-inch`, `Android Emulator`, `Galaxy S4`, etc.... On iOS, this should be one of the valid devices returned by instruments with `instruments -s devices`. On Android this capability is currently ignored, though it remains required.|
 |`app`|The absolute local path _or_ remote http URL to an `.ipa` or `.apk` file, or a `.zip` containing one of these. Appium will attempt to install this app binary on the appropriate device first. Note that this capability is not required for Android if you specify `appPackage` and `appActivity` capabilities (see below). Incompatible with `browserName`.|`/abs/path/to/my.apk` or `http://myapp.com/app.ipa`|
 |`browserName`|Name of mobile web browser to automate. Should be an empty string if automating an app instead.|'Safari' for iOS and 'Chrome', 'Chromium', or 'Browser' for Android|
 |`newCommandTimeout`|How long (in seconds) Appium will wait for a new command from the client before assuming the client quit and ending the session|e.g. `60`|
-|`language`| (Sim/Emu-only) Language to set for the simulator / emulator |e.g. `fr`|
-|`locale`| (Sim/Emu-only) Locale to set for the simulator / emulator |e.g. `fr_CA`|
+|`language`| (Sim/Emu-only) Language to set for the simulator / emulator. On Android, available only on API levels 22 and below |e.g. `fr`|
+|`locale`| (Sim/Emu-only) Locale to set for the simulator / emulator. |e.g. `fr_CA`|
 |`udid`| Unique device identifier of the connected physical device|e.g. `1ae203187fc012g`|
 |`orientation`| (Sim/Emu-only) start in a certain orientation|`LANDSCAPE` or `PORTRAIT`|
 |`autoWebview`| Move directly into Webview context. Default `false`|`true`, `false`|
-|`noReset`| Don't reset app state before this session. See [here](/docs/en/writing-running-appium/reset-strategies.md) for more details  |`true`, `false`|
-|`fullReset`| Perform a complete reset. See [here](/docs/en/writing-running-appium/reset-strategies.md) for more details |`true`, `false`|
+|`noReset`| Don't reset app state before this session. See [here](/docs/en/writing-running-appium/other/reset-strategies.md) for more details  |`true`, `false`|
+|`fullReset`| Perform a complete reset. See [here](/docs/en/writing-running-appium/other/reset-strategies.md) for more details |`true`, `false`|
 |`eventTimings`|Enable or disable the reporting of the timings for various Appium-internal events (e.g., the start and end of each command, etc.). Defaults to `false`. To enable, use `true`. The timings are then reported as `events` property on response to querying the current session. See the [event timing docs](/docs/en/advanced-concepts/event-timings.md) for the the structure of this response.|e.g., `true`|
 |`enablePerformanceLogging`| (Web and webview only) Enable Chromedriver's (on Android) or Safari's (on iOS) performance logging (default `false`)| `true`, `false`|
+|`printPageSourceOnFindFailure`| When a find operation fails, print the current page source. Defaults to `false`.|e.g., `true`|
 
 ### Android Only
 
-<expand_table>
+These Capabilities are available only on Android-based drivers (like
+[UiAutomator2](/docs/en/drivers/android-uiautomator2.md) for example).
 
 |Capability|Description|Values|
 |----|-----------|-------|
@@ -39,6 +72,7 @@
 |`androidInstallTimeout`|Timeout in milliseconds used to wait for an apk to install to the device. Defaults to `90000` |e.g., `90000`|
 |`androidInstallPath`| The name of the directory on the device in which the apk will be push before install. Defaults to `/data/local/tmp` |e.g. `/sdcard/Downloads/`|
 |`adbPort`|Port used to connect to the ADB server (default `5037`)|`5037`|
+|`systemPort` | `systemPort` used to connect to [appium-uiautomator2-server](https://github.com/appium/appium-uiautomator2-server), default is `8200` in general and selects one port from `8200` to `8299`. When you run tests in parallel, you must adjust the port to avoid conflicts. Read [Parallel Testing Setup Guide](https://github.com/appium/appium/blob/master/docs/en/advanced-concepts/parallel-tests.md#parallel-android-tests) for more details. | e.g., `8201` |
 |`remoteAdbHost`|Optional remote ADB server host|e.g.: 192.168.0.101|
 |`androidDeviceSocket`|Devtools socket name. Needed only when tested app is a Chromium embedding browser. The socket is open by the browser and Chromedriver connects to it as a devtools client.|e.g., `chrome_devtools_remote`|
 |`avd`| Name of avd to launch|e.g., `api19`|
@@ -73,7 +107,9 @@
 
 ### iOS Only
 
-<expand_table>
+These Capabilities are available only on the [XCUITest
+Driver](/docs/en/drivers/ios-xcuitest.md) and the deprecated [UIAutomation
+Driver](/docs/en/drivers/ios-uiautomation.md).
 
 |Capability|Description|Values|
 |----|-----------|-------|
@@ -106,20 +142,8 @@
 
 ### iOS Only, using XCUITest
 
-(For XCUITest-specific capabilities, please refer to the documentation on the [XCUITest driver](https://github.com/appium/appium-xcuitest-driver#desired-capabilities) itself.)
+(For XCUITest-specific capabilities, please refer to the documentation on the [XCUITest Driver repo](https://github.com/appium/appium-xcuitest-driver#desired-capabilities) itself.)
 
 ### You.i Engine Only
 
-<expand_table>
-
 (For You.i Engine-specific capabilities, please refer to the documentation on the [You.i Engine driver](https://github.com/YOU-i-Labs/appium-youiengine-driver#desired-capabilities) itself.)
-
-### WinAppDriver Only
-
-<expand_table>
-
-|Capability|Description|Values|
-|----|-----------|-------|
-|`platformName`| Which platform the test is being done on |e.g. `Windows`|
-|`deviceName`| The name of the device being tested on | e.g. `WindowsPC`|
-|`app`| appID of the windows app for testing or the path to the .exe file. See [this page](/docs/en/writing-running-appium/windows-app-testing.md) for details on how to find the appID | e.g. `c24c8163-548e-4b84-a466-530178fc0580_scyf5npe3hv32!App`|

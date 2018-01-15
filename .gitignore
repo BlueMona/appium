@@ -2,6 +2,7 @@
 *.swp
 .DS_Store
 node_modules
+package-lock.json
 sample-code
 *.trace
 xcuserdata
@@ -31,3 +32,5 @@ build/
 __pycache__
 old
 .tern-project
+coverage
+docs/mkdocs.yml
